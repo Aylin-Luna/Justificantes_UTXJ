@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Justificantes UTXJ</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <nav class="navbar navbar-dark bg-primary mb-4">
+    <div class="container">
+      <span class="navbar-brand fw-semibold">Justificantes UTXJ</span>
+      <a href="form.html" class="btn btn-light btn-sm">+ Nuevo justificante</a>
+    </div>
+  </nav>
+
+  <main class="container pb-5">
+    <div class="card mb-4">
+      <div class="card-body">
+        <form id="filtros" class="row g-2 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label" for="q">Buscar</label>
+            <input class="form-control" id="q" placeholder="Folio, matricula o nombre">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="estado">Estado</label>
+            <select class="form-select" id="estado">
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="aprobado">Aprobado</option>
+              <option value="rechazado">Rechazado</option>
+            </select>
+          </div>
+          <div class="col-md-2 d-grid">
+            <button class="btn btn-primary" type="submit">Buscar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="alerta" class="alert d-none" role="alert"></div>
+
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Justificantes</span>
+        <span id="contador" class="text-muted small"></span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Folio</th>
+              <th>Estudiante</th>
+              <th>Carrera / Grupo</th>
+              <th>Periodo</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="card h-100">
+          <div class="card-header fw-semibold">Registrar estudiante</div>
+          <div class="card-body">
+            <form id="form-estudiante" class="row g-2">
+              <div class="col-12">
+                <label class="form-label" for="est-matricula">Matricula</label>
+                <input class="form-control" id="est-matricula" name="matricula" required maxlength="20">
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="est-nombre">Nombre completo</label>
+                <input class="form-control" id="est-nombre" name="nombre" required maxlength="120">
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="est-carrera">Carrera</label>
+                <input class="form-control" id="est-carrera" name="carrera" required maxlength="120">
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="est-grupo">Grupo</label>
+                <input class="form-control" id="est-grupo" name="grupo" required maxlength="20">
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="est-correo">Correo (opcional)</label>
+                <input type="email" class="form-control" id="est-correo" name="correo" maxlength="120">
+              </div>
+              <div class="col-12 d-grid mt-3">
+                <button class="btn btn-success">Guardar estudiante</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card h-100">
+          <div class="card-header fw-semibold">Estudiantes registrados</div>
+          <div class="table-responsive">
+            <table class="table table-sm mb-0 align-middle">
+              <thead class="table-light">
+                <tr><th>Matricula</th><th>Nombre</th><th>Carrera</th><th>Grupo</th></tr>
+              </thead>
+              <tbody id="tabla-estudiantes"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
