@@ -4,6 +4,15 @@ const catalogos = require('../models/catalogos.model');
 const { asyncHandler } = require('../utils/errors');
 const validators = require('../utils/validators');
 
+const registro = asyncHandler(async (req, res) => {
+  const [institucion, carreras, grupos] = await Promise.all([
+    catalogos.getInstitution(1),
+    catalogos.getCareers(),
+    catalogos.getGroups(),
+  ]);
+  res.json({ institucion, carreras, grupos });
+});
+
 const all = asyncHandler(async (req, res) => {
   const [institucion, carreras, grupos, materias, motivos, tiposDocumento, estados, ajustes] =
     await Promise.all([
@@ -92,6 +101,7 @@ const diasInhabiles = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  registro,
   all,
   institucion,
   carreras,

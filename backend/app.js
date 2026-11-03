@@ -76,7 +76,8 @@ if (!config.isProduction) {
 app.use('/api', apiLimiter);
 app.use('/api', (req, res, next) => {
   const safe = ['GET', 'HEAD', 'OPTIONS'].includes(req.method);
-  if (safe || req.path === '/auth/login') return next();
+  const csrfExempt = ['/auth/login', '/auth/registro'].includes(req.path);
+  if (safe || csrfExempt) return next();
   return verifyCsrf(req, res, next);
 });
 

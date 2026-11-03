@@ -4,7 +4,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
 const authModel = require('../models/auth.model');
-const { AppError, badRequest, unauthorized, forbidden } = require('../utils/errors');
+const validators = require('../utils/validators');
+const { AppError, badRequest, unauthorized, forbidden, conflict } = require('../utils/errors');
+
+const NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' .-]+$/;
+const USERNAME_PATTERN = /^[A-Za-z0-9._-]+$/;
+const ENROLLMENT_PATTERN = /^[A-Za-z0-9-]+$/;
+const PHONE_PATTERN = /^[0-9+\-()\s]{7,30}$/;
 
 const publicUser = (user) => ({
   id: user.id,
@@ -90,6 +96,124 @@ const login = async ({ identifier, password, ip }) => {
   };
 };
 
+const registerStudent = async ({ data = {}, ip }) => {
+  const errors = [];
+  const enrollment = validators.requiredString(
+    errors,
+    data.matricula ?? data.enrollment,
+    'matricula',
+    'La matrícula',
+    {
+      min: 4,
+      max: 20,
+      pattern: ENROLLMENT_PATTERN,
+      message: 'La matrícula solo admite letras, números y guiones',
+    }
+  );
+  const firstName = validators.requiredString(
+    errors,
+    data.nombres ?? data.firstName,
+    'nombres',
+    'El nombre',
+    { min: 2, max: 100, pattern: NAME_PATTERN, message: 'El nombre contiene caracteres no válidos' }
+  );
+  const lastName = validators.requiredString(
+    errors,
+    data.apellido_paterno ?? data.lastName,
+    'apellido_paterno',
+    'El apellido paterno',
+    { min: 2, max: 100, pattern: NAME_PATTERN, message: 'El apellido paterno contiene caracteres no válidos' }
+  );
+  const secondLastName = validators.optionalString(
+    errors,
+    data.apellido_materno ?? data.secondLastName,
+    'apellido_materno',
+    'El apellido materno',
+    { max: 100, pattern: NAME_PATTERN, message: 'El apellido materno contiene caracteres no válidos' }
+  );
+  const email = validators.requiredEmail(errors, data.correo ?? data.email, 'El correo electrónico');
+  const phone = validators.optionalString(
+    errors,
+    data.telefono ?? data.phone,
+    'telefono',
+    'El teléfono',
+    { max: 30, pattern: PHONE_PATTERN, message: 'El teléfono solo admite números, espacios, guiones y paréntesis' }
+  );
+  const idGroup = validators.toInt(data.id_grupo ?? data.idGroup ?? data.grupo, null);
+  if (!idGroup) errors.push('Seleccione su grupo');
+  const idCareer = validators.toInt(data.id_carrera ?? data.idCareer ?? data.carrera, null);
+
+  const username = validators.requiredString(
+    errors,
+    data.usuario ?? data.username,
+    'usuario',
+    'El nombre de usuario',
+    {
+      min: 3,
+      max: 60,
+      pattern: USERNAME_PATTERN,
+      message: 'El usuario solo admite letras, números, punto, guion y guion bajo',
+    }
+  );
+
+  const password = String(data.password ?? data.contrasena ?? '');
+  if (!password) {
+    errors.push('Capture una contraseña');
+  } else {
+    if (password.length < 8) errors.push('La contraseña debe tener al menos 8 caracteres');
+    if (password.length > 128) errors.push('La contraseña no debe exceder 128 caracteres');
+    if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      errors.push('La contraseña debe incluir letras y números');
+    }
+  }
+  const confirmation = String(
+    data.confirmar_password ?? data.password_confirmacion ?? data.confirmPassword ?? ''
+  );
+  if (password && confirmation !== password) {
+    errors.push('Las contraseñas no coinciden');
+  }
+
+  validators.ensureNoErrors(errors);
+
+  const fullName = [firstName, lastName, secondLastName].filter(Boolean).join(' ');
+  const passwordHash = await bcrypt.hash(password, config.security.bcryptRounds);
+
+  let created;
+  try {
+    created = await authModel.registerStudentAccount(
+      {
+        enrollment,
+        firstName,
+        lastName,
+        secondLastName,
+        email,
+        phone,
+        idGroup,
+        idCareer,
+        username,
+        passwordHash,
+        fullName,
+      },
+      { ip }
+    );
+  } catch (error) {
+    if (error && error.code === 'ER_DUP_ENTRY') {
+      throw conflict('No se pudo completar el registro: la matrícula, el usuario o el correo ya están en uso.');
+    }
+    throw error;
+  }
+
+  await authModel.logAuthEvent({
+    idUser: created.idUser,
+    username,
+    action: 'REGISTRO',
+    description: 'Registro público de alumno',
+    ip,
+  });
+
+  return login({ identifier: username, password, ip });
+};
+
 const changePassword = async (userId, { currentPassword, newPassword }) => {
   const user = await authModel.findById(userId);
   if (!user) throw unauthorized();
@@ -126,6 +250,7 @@ const verifyToken = (token) => jwt.verify(token, config.jwt.secret);
 
 module.exports = {
   login,
+  registerStudent,
   changePassword,
   verifyToken,
   publicUser,

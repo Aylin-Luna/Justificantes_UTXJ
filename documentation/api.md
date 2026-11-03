@@ -8,7 +8,7 @@ Todas las respuestas son JSON salvo la descarga de comprobantes. Las rutas marca
 
 - La sesión se transporta en la cookie `utxj_sesion` (`HttpOnly`, `SameSite=Strict`).
 - Al iniciar sesión se emite también la cookie `utxj_csrf`.
-- Toda petición de escritura (`POST`, `PUT`, `PATCH`, `DELETE`) debe enviar la cabecera `X-CSRF-Token` con el valor de `utxj_csrf`, **excepto** `/auth/login`.
+- Toda petición de escritura (`POST`, `PUT`, `PATCH`, `DELETE`) debe enviar la cabecera `X-CSRF-Token` con el valor de `utxj_csrf`, **excepto** `/auth/login` y `/auth/registro`.
 - El cliente puede obtener un token actualizado en `GET /auth/me`.
 
 ### `POST /auth/login`
@@ -29,6 +29,33 @@ Todas las respuestas son JSON salvo la descarga de comprobantes. Las rutas marca
   "csrfToken": "…"
 }
 ```
+
+### `POST /auth/registro`
+
+Registro público de alumnos. No requiere sesión ni token CSRF (igual que el login) y está
+limitado por rate limiting. Crea el expediente si la matrícula no existe o lo vincula si
+la matrícula y el correo coinciden con un expediente sin cuenta.
+
+```json
+{
+  "matricula": "240545",
+  "nombres": "Ana Sofía",
+  "apellido_paterno": "López",
+  "apellido_materno": "García",
+  "correo": "240545@utxicotepec.edu.mx",
+  "telefono": "7641000009",
+  "id_carrera": 1,
+  "id_grupo": 1,
+  "usuario": "ana.lopez",
+  "password": "Alumna2026!",
+  "confirmar_password": "Alumna2026!"
+}
+```
+
+Respuesta `201` con la misma estructura del login (`mensaje`, `usuario`, `csrfToken`) y la
+cookie de sesión ya emitida. Errores habituales: `400` por validaciones y `409` cuando la
+matrícula, el usuario o el correo ya están en uso, o cuando el expediente no puede
+vincularse de forma segura.
 
 ### `POST /auth/logout` 🔒
 
@@ -184,6 +211,7 @@ Ejecuta el proceso de vencimiento de aprobados.
 | Método | Ruta | Descripción |
 | --- | --- | --- |
 | GET | `/catalogos` 🔒 | Todos los catálogos y ajustes públicos. |
+| GET | `/catalogos/registro` | Carreras y grupos activos para el formulario público de registro. |
 | GET | `/catalogos/institucion` 🔒 | Institución. |
 | GET | `/catalogos/carreras` 🔒 | Carreras. |
 | GET | `/catalogos/grupos?carrera=` 🔒 | Grupos, opcionalmente por carrera. |

@@ -817,6 +817,54 @@ button {
   display: none;
 }
 
+.auth-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 26px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.auth-tab {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-500);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+}
+
+.auth-tab:hover {
+  color: var(--ink-900);
+}
+
+.auth-tab.is-active {
+  background: var(--paper);
+  color: var(--green-800);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-tab:focus-visible {
+  outline: 2px solid var(--green-500);
+  outline-offset: 2px;
+}
+
+#panel-registro .login-form {
+  gap: 18px;
+}
+
+#login-alert:not([hidden]),
+#registro-alert:not([hidden]) {
+  margin-bottom: 20px;
+}
+
 .login-card h2 {
   font-family: var(--font-display);
   font-size: 30px;

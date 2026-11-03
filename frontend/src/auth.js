@@ -97,6 +97,15 @@ export async function login(identifier, password) {
   return currentUser;
 }
 
+export async function registerStudent(payload) {
+  const data = await api.post('/auth/registro', payload, { allowUnauthorized: true });
+
+  setCsrfToken(data.csrfToken);
+  currentUser = data.usuario;
+  cacheUser(currentUser);
+  return currentUser;
+}
+
 export async function bootstrapSession() {
   try {
     const data = await api.get('/auth/me', { allowUnauthorized: true });

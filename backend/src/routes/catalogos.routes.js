@@ -6,6 +6,9 @@ const { authenticate, requireRole } = require('../middlewares/auth');
 
 const router = express.Router();
 
+// Catálogo mínimo para el formulario público de registro de alumnos.
+router.get('/registro', controller.registro);
+
 router.use(authenticate);
 
 router.get('/', controller.all);

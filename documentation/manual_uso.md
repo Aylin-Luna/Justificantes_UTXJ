@@ -6,6 +6,19 @@
 2. Capture usuario o correo y contraseña.
 3. El sistema redirige al panel correspondiente según sus roles.
 
+### Crear una cuenta de alumno
+
+1. En la pantalla de acceso elija la pestaña **Crear cuenta**.
+2. Capture matrícula, nombre(s), apellidos, correo, teléfono opcional, carrera, grupo,
+   usuario y contraseña.
+3. Si su matrícula ya existe en Control Escolar, el correo debe coincidir con el que está
+   registrado en su expediente; de lo contrario acuda a Control Escolar.
+4. Al enviar el formulario, la cuenta se crea con el rol `alumno` y la sesión se inicia
+   automáticamente.
+
+> Solo los alumnos pueden registrarse desde el acceso. Los demás perfiles se crean desde
+> el módulo de administración o directamente en la base de datos.
+
 ### Usuarios demo
 
 | Perfil | Usuario | Contraseña |

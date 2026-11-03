@@ -1,28 +1,51 @@
 /**
- * Página de acceso. Verifica la sesión existente, presenta el formulario y
- * redirige a la aplicación según el resultado del inicio de sesión.
+ * Página de acceso y registro. Verifica la sesión existente, presenta los
+ * formularios y redirige a la aplicación según el resultado.
  */
 
 import api from './api.js';
-import { bootstrapSession, login, homePathFor } from './auth.js';
+import { bootstrapSession, login, registerStudent, homePathFor } from './auth.js';
 import { escapeHtml } from './ui.js';
 
 const form = document.getElementById('login-form');
 const identifier = document.getElementById('usuario');
-const password = document.getElementById('password');
+const passwordInput = document.getElementById('password');
 const submit = document.getElementById('login-submit');
 const alertBox = document.getElementById('login-alert');
 const toggle = document.getElementById('toggle-password');
 const serverStatus = document.getElementById('server-status');
 const serverStatusText = document.getElementById('server-status-text');
 
-const showAlert = (message, type = 'error') => {
-  if (!alertBox) return;
-  alertBox.hidden = false;
+const tabLogin = document.getElementById('tab-login');
+const tabRegistro = document.getElementById('tab-registro');
+const panelLogin = document.getElementById('panel-login');
+const panelRegistro = document.getElementById('panel-registro');
+
+const registroForm = document.getElementById('registro-form');
+const registroAlert = document.getElementById('registro-alert');
+const registroSubmit = document.getElementById('registro-submit');
+const regMatricula = document.getElementById('reg-matricula');
+const regNombres = document.getElementById('reg-nombres');
+const regApellidoPaterno = document.getElementById('reg-apellido-paterno');
+const regApellidoMaterno = document.getElementById('reg-apellido-materno');
+const regCorreo = document.getElementById('reg-correo');
+const regTelefono = document.getElementById('reg-telefono');
+const regCarrera = document.getElementById('reg-carrera');
+const regGrupo = document.getElementById('reg-grupo');
+const regUsuario = document.getElementById('reg-usuario');
+const regPassword = document.getElementById('reg-password');
+const regPasswordConfirm = document.getElementById('reg-password-confirm');
+
+let groupsCatalog = [];
+let catalogRequest = null;
+
+const showAlertFor = (box, message, type = 'error') => {
+  if (!box) return;
+  box.hidden = false;
   const iconName = type === 'error' ? 'alert-circle' : type === 'warning' ? 'alert-triangle' : 'info';
-  alertBox.className = `alert alert-${type}`;
-  alertBox.setAttribute('role', type === 'error' ? 'alert' : 'status');
-  alertBox.innerHTML = `
+  box.className = `alert alert-${type}`;
+  box.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  box.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;margin-top:1px">
       ${iconName === 'alert-circle'
       ? '<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>'
@@ -34,15 +57,22 @@ const showAlert = (message, type = 'error') => {
   `;
 };
 
-const hideAlert = () => {
-  if (alertBox) alertBox.hidden = true;
+const hideAlert = (box) => {
+  if (box) box.hidden = true;
 };
 
-const setLoading = (loading) => {
+const setLoginLoading = (loading) => {
   submit.disabled = loading;
   submit.innerHTML = loading
     ? '<span class="spinner small" aria-hidden="true"></span><span>Verificando…</span>'
     : 'Iniciar sesión';
+};
+
+const setRegistroLoading = (loading) => {
+  registroSubmit.disabled = loading;
+  registroSubmit.innerHTML = loading
+    ? '<span class="spinner small" aria-hidden="true"></span><span>Creando cuenta…</span>'
+    : 'Crear cuenta';
 };
 
 const checkHealth = async () => {
@@ -62,12 +92,119 @@ const redirectToApp = (user) => {
   window.location.replace(homePathFor(user));
 };
 
+/* --------------------------------------------------------------------------
+   Registro público de alumnos
+   -------------------------------------------------------------------------- */
+
+const groupLabel = (group) => {
+  const shift = group.shift ? group.shift.charAt(0).toUpperCase() + group.shift.slice(1) : '';
+  return [group.name, group.grade ? `${group.grade}°` : '', shift, group.schoolPeriod]
+    .filter(Boolean)
+    .join(' · ');
+};
+
+const fillGroups = () => {
+  if (!regGrupo) return;
+  const careerId = Number(regCarrera?.value || 0);
+  if (!careerId) {
+    regGrupo.disabled = true;
+    regGrupo.innerHTML = '<option value="">Seleccione su carrera</option>';
+    return;
+  }
+
+  const groups = groupsCatalog.filter((group) => Number(group.careerId) === careerId);
+  if (groups.length === 0) {
+    regGrupo.disabled = true;
+    regGrupo.innerHTML = '<option value="">Sin grupos disponibles</option>';
+    return;
+  }
+
+  regGrupo.disabled = false;
+  regGrupo.innerHTML = '<option value="">Seleccione su grupo</option>'
+    + groups.map((group) => `<option value="${escapeHtml(group.id)}">${escapeHtml(groupLabel(group))}</option>`).join('');
+};
+
+const loadCatalogs = () => {
+  if (catalogRequest) return catalogRequest;
+
+  catalogRequest = api.get('/catalogos/registro', { allowUnauthorized: true })
+    .then((data) => {
+      const careers = Array.isArray(data?.carreras) ? data.carreras : [];
+      groupsCatalog = Array.isArray(data?.grupos) ? data.grupos : [];
+
+      if (regCarrera) {
+        regCarrera.innerHTML = '<option value="">Seleccione su carrera</option>'
+          + careers.map((career) => `<option value="${escapeHtml(career.id)}">${escapeHtml(career.name)}</option>`).join('');
+      }
+      fillGroups();
+      return data;
+    })
+    .catch((error) => {
+      catalogRequest = null;
+      if (regCarrera) {
+        regCarrera.innerHTML = '<option value="">No se pudieron cargar las carreras</option>';
+      }
+      throw error;
+    });
+
+  return catalogRequest;
+};
+
+const activatePanel = (name) => {
+  if (!panelLogin || !panelRegistro) return;
+  const isRegistro = name === 'registro';
+
+  panelLogin.hidden = isRegistro;
+  panelRegistro.hidden = !isRegistro;
+
+  [tabLogin, tabRegistro].forEach((tab) => {
+    if (!tab) return;
+    const active = tab === (isRegistro ? tabRegistro : tabLogin);
+    tab.classList.toggle('is-active', active);
+    tab.setAttribute('aria-selected', String(active));
+    tab.tabIndex = active ? 0 : -1;
+  });
+
+  hideAlert(alertBox);
+  hideAlert(registroAlert);
+
+  if (isRegistro) {
+    if (window.location.hash !== '#registro') {
+      window.history.replaceState(null, '', '#registro');
+    }
+    loadCatalogs()
+      .catch(() => {
+        showAlertFor(registroAlert, 'No se pudieron cargar las carreras y grupos. Recargue la página o acuda a Control Escolar.', 'error');
+      })
+      .finally(() => {
+        regMatricula?.focus();
+      });
+  } else {
+    if (window.location.hash === '#registro') {
+      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+    }
+    identifier?.focus();
+  }
+};
+
+tabLogin?.addEventListener('click', () => activatePanel('login'));
+tabRegistro?.addEventListener('click', () => activatePanel('registro'));
+
+regCarrera?.addEventListener('change', () => {
+  fillGroups();
+  hideAlert(registroAlert);
+});
+
+/* --------------------------------------------------------------------------
+   Inicio de sesión
+   -------------------------------------------------------------------------- */
+
 const init = async () => {
   checkHealth();
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('motivo') === 'sesion') {
-    showAlert('Su sesión expiró por seguridad. Ingrese nuevamente con sus credenciales.', 'info');
+    showAlertFor(alertBox, 'Su sesión expiró por seguridad. Ingrese nuevamente con sus credenciales.', 'info');
   }
 
   const existing = await bootstrapSession().catch(() => null);
@@ -76,12 +213,16 @@ const init = async () => {
     return;
   }
 
-  if (identifier) identifier.focus();
+  if (window.location.hash === '#registro') {
+    activatePanel('registro');
+  } else if (identifier) {
+    identifier.focus();
+  }
 };
 
 toggle?.addEventListener('click', () => {
-  const visible = password.type === 'text';
-  password.type = visible ? 'password' : 'text';
+  const visible = passwordInput.type === 'text';
+  passwordInput.type = visible ? 'password' : 'text';
   toggle.setAttribute('aria-pressed', String(!visible));
   toggle.setAttribute('aria-label', visible ? 'Mostrar contraseña' : 'Ocultar contraseña');
   toggle.innerHTML = visible
@@ -92,40 +233,108 @@ toggle?.addEventListener('click', () => {
 document.querySelectorAll('[data-demo-user]').forEach((button) => {
   button.addEventListener('click', () => {
     identifier.value = button.dataset.demoUser || '';
-    password.value = button.dataset.demoPassword || '';
-    hideAlert();
+    passwordInput.value = button.dataset.demoPassword || '';
+    hideAlert(alertBox);
     submit.focus();
   });
 });
 
 form?.addEventListener('submit', async (event) => {
   event.preventDefault();
-  hideAlert();
+  hideAlert(alertBox);
 
   const user = identifier.value.trim();
-  const pass = password.value;
+  const pass = passwordInput.value;
 
   if (!user) {
-    showAlert('Capture su usuario o correo institucional.');
+    showAlertFor(alertBox, 'Capture su usuario o correo institucional.');
     identifier.focus();
     return;
   }
   if (!pass) {
-    showAlert('Capture su contraseña.');
-    password.focus();
+    showAlertFor(alertBox, 'Capture su contraseña.');
+    passwordInput.focus();
     return;
   }
 
-  setLoading(true);
+  setLoginLoading(true);
   try {
     const authenticated = await login(user, pass);
     submit.innerHTML = '<span class="spinner small" aria-hidden="true"></span><span>Accediendo…</span>';
     redirectToApp(authenticated);
   } catch (error) {
-    setLoading(false);
+    setLoginLoading(false);
     const message = error?.message || 'No se pudo iniciar sesión. Intente de nuevo.';
-    showAlert(message, error?.status === 423 ? 'warning' : 'error');
-    password.select();
+    showAlertFor(alertBox, message, error?.status === 423 ? 'warning' : 'error');
+    passwordInput.select();
+  }
+});
+
+/* --------------------------------------------------------------------------
+   Envío del registro
+   -------------------------------------------------------------------------- */
+
+registroForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  hideAlert(registroAlert);
+
+  const matricula = regMatricula.value.trim();
+  const nombres = regNombres.value.trim();
+  const apellidoPaterno = regApellidoPaterno.value.trim();
+  const apellidoMaterno = regApellidoMaterno.value.trim();
+  const correo = regCorreo.value.trim();
+  const telefono = regTelefono.value.trim();
+  const idCarrera = regCarrera.value;
+  const idGrupo = regGrupo.value;
+  const usuario = regUsuario.value.trim();
+  const password = regPassword.value;
+  const confirmacion = regPasswordConfirm.value;
+
+  let error = null;
+  if (!matricula) error = 'Capture su matrícula.';
+  else if (!nombres) error = 'Capture su nombre.';
+  else if (!apellidoPaterno) error = 'Capture su apellido paterno.';
+  else if (!correo) error = 'Capture su correo electrónico.';
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) error = 'El correo electrónico no tiene un formato válido.';
+  else if (!idCarrera) error = 'Seleccione su carrera.';
+  else if (!idGrupo) error = 'Seleccione su grupo.';
+  else if (!usuario) error = 'Elija un nombre de usuario.';
+  else if (usuario.length < 3) error = 'El nombre de usuario debe tener al menos 3 caracteres.';
+  else if (!/^[A-Za-z0-9._-]+$/.test(usuario)) error = 'El usuario solo admite letras, números, punto, guion y guion bajo.';
+  else if (!password) error = 'Capture una contraseña.';
+  else if (password.length < 8) error = 'La contraseña debe tener al menos 8 caracteres.';
+  else if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) error = 'La contraseña debe incluir letras y números.';
+  else if (password !== confirmacion) error = 'Las contraseñas no coinciden.';
+
+  if (error) {
+    showAlertFor(registroAlert, error, 'error');
+    return;
+  }
+
+  setRegistroLoading(true);
+  try {
+    const authenticated = await registerStudent({
+      matricula,
+      nombres,
+      apellido_paterno: apellidoPaterno,
+      apellido_materno: apellidoMaterno || undefined,
+      correo,
+      telefono: telefono || undefined,
+      id_carrera: idCarrera,
+      id_grupo: idGrupo,
+      usuario,
+      password,
+      confirmar_password: confirmacion,
+    });
+    registroSubmit.innerHTML = '<span class="spinner small" aria-hidden="true"></span><span>Accediendo…</span>';
+    redirectToApp(authenticated);
+  } catch (err) {
+    setRegistroLoading(false);
+    const details = Array.isArray(err?.details) ? err.details.filter(Boolean) : [];
+    const message = details.length > 0
+      ? details[0]
+      : err?.message || 'No se pudo crear la cuenta. Intente de nuevo.';
+    showAlertFor(registroAlert, message, err?.status === 409 ? 'warning' : 'error');
   }
 });
 

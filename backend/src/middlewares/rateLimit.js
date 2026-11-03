@@ -16,6 +16,15 @@ const loginLimiter = rateLimit({
   handler,
 });
 
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: 'Demasiados registros desde esta conexión. Espere una hora o acuda a Control Escolar.',
+  handler,
+});
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 600,
@@ -34,4 +43,4 @@ const writeLimiter = rateLimit({
   handler,
 });
 
-module.exports = { loginLimiter, apiLimiter, writeLimiter };
+module.exports = { loginLimiter, registerLimiter, apiLimiter, writeLimiter };

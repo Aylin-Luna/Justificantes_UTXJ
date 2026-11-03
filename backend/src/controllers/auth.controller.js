@@ -41,6 +41,22 @@ const login = asyncHandler(async (req, res) => {
   });
 });
 
+const register = asyncHandler(async (req, res) => {
+  const result = await authService.registerStudent({
+    data: req.body,
+    ip: req.ip,
+  });
+
+  res.cookie(config.cookie.name, result.token, cookieOptions);
+  const csrfToken = issueCsrfToken(res);
+
+  res.status(201).json({
+    mensaje: 'Cuenta creada correctamente. Bienvenido.',
+    usuario: result.user,
+    csrfToken,
+  });
+});
+
 const logout = asyncHandler(async (req, res) => {
   if (req.user) {
     await authModel.logAuthEvent({
@@ -75,4 +91,4 @@ const changePassword = asyncHandler(async (req, res) => {
   res.json({ mensaje: 'Contraseña actualizada correctamente' });
 });
 
-module.exports = { login, logout, me, changePassword };
+module.exports = { login, register, logout, me, changePassword };

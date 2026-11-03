@@ -203,6 +203,28 @@ npm run demo:files
 
 > Son credenciales ficticias de demostración. Cámbielas antes de un despliegue real.
 
+## Registro público de alumnos
+
+Desde la pantalla de acceso, la pestaña **Crear cuenta** permite que un alumno genere su
+propia cuenta sin intervención del administrador:
+
+1. Capture matrícula, nombre(s), apellidos, correo, teléfono opcional, carrera, grupo,
+   usuario y contraseña.
+2. Si la matrícula no existe, el sistema crea el expediente en `tb_students`.
+3. Si la matrícula ya existe en Control Escolar y aún no tiene cuenta, solo se vincula
+   cuando el correo capturado coincide exactamente con el registrado en el expediente.
+4. Se crea el usuario con contraseña bcrypt y se le asigna únicamente el rol `alumno`.
+5. Al terminar, la sesión se inicia automáticamente y se redirige al panel del alumno.
+
+Reglas del registro:
+
+- Solo se pueden auto-registrar alumnos; tutores, dirección y administración se crean
+  desde el módulo de usuarios o directamente en la base de datos.
+- No se permite apropiarse de un expediente existente sin la coincidencia de matrícula y
+  correo, ni registrar matrículas, usuarios o correos duplicados.
+- La contraseña debe tener al menos 8 caracteres e incluir letras y números.
+- La ruta está limitada por rate limiting para evitar registros masivos.
+
 ## Flujo resumido
 
 ```text
@@ -235,6 +257,7 @@ Base: `/api`. Las rutas de escritura requieren `X-CSRF-Token`.
 | --- | --- | --- |
 | GET | `/health` | Estado del servicio y MySQL. |
 | POST | `/auth/login` | Inicia sesión. |
+| POST | `/auth/registro` | Registro público de alumnos y sesión automática. |
 | POST | `/auth/logout` | Cierra sesión. |
 | GET | `/auth/me` | Usuario actual y token CSRF. |
 | POST | `/auth/cambiar-password` | Cambia la contraseña propia. |
@@ -256,6 +279,7 @@ Base: `/api`. Las rutas de escritura requieren `X-CSRF-Token`.
 | GET | `/justificantes/:id/documentos/:docId/archivo` | Descarga privada. |
 | GET | `/dashboard` | Indicadores por rol. |
 | GET | `/catalogos` | Catálogos y ajustes públicos. |
+| GET | `/catalogos/registro` | Carreras y grupos activos para el registro público. |
 | GET | `/usuarios` | Lista de usuarios (admin). |
 | PATCH | `/usuarios/:id/roles` | Cambia roles (admin). |
 | PATCH | `/usuarios/:id/estado` | Activa/desactiva (admin). |

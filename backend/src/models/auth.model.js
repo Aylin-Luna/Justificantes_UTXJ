@@ -1,6 +1,7 @@
 'use strict';
 
-const { query, queryOne, execute } = require('../../database/pool');
+const { query, queryOne, execute, withTransaction } = require('../../database/pool');
+const { conflict, badRequest } = require('../utils/errors');
 
 const USER_COLUMNS = `
   u.id_user, u.username, u.email, u.password_hash, u.full_name,
@@ -211,6 +212,119 @@ const resetPassword = async (idUser, passwordHash) => {
   return findPublicById(idUser);
 };
 
+/**
+ * Crea (o vincula) el expediente de un alumno y su cuenta de acceso en una
+ * sola transacción. Solo se vincula un expediente existente cuando la
+ * matrícula y el correo coinciden exactamente y aún no tiene cuenta.
+ */
+const registerStudentAccount = async (data, audit = {}) => withTransaction(async (connection) => {
+  const enrollment = data.enrollment;
+  const email = data.email;
+
+  const [groupRows] = await connection.query(
+    `SELECT id_group, id_career
+       FROM tb_groups
+      WHERE id_group = ? AND active = 1
+      LIMIT 1`,
+    [data.idGroup]
+  );
+  if (groupRows.length === 0) {
+    throw badRequest('El grupo seleccionado no está disponible');
+  }
+  if (data.idCareer && groupRows[0].id_career !== data.idCareer) {
+    throw badRequest('El grupo seleccionado no corresponde a la carrera');
+  }
+
+  const [studentRows] = await connection.query(
+    `SELECT s.id_student, s.enrollment, s.email, s.id_group, s.status,
+            s.first_name, s.last_name, s.second_last_name,
+            (SELECT u.id_user FROM tb_users u WHERE u.id_student = s.id_student LIMIT 1) AS id_user
+       FROM tb_students s
+      WHERE s.enrollment = ?
+      LIMIT 1`,
+    [enrollment]
+  );
+
+  let idStudent;
+  let fullName = data.fullName;
+  const existingStudent = studentRows[0];
+  if (existingStudent) {
+    if (existingStudent.id_user) {
+      throw conflict('La matrícula ya tiene una cuenta registrada. Inicie sesión o acuda a Control Escolar.');
+    }
+    if (existingStudent.status !== 'activo') {
+      throw conflict('El expediente no está activo. Acuda a Control Escolar para regularizarlo.');
+    }
+    if (!existingStudent.email || existingStudent.email.toLowerCase() !== email.toLowerCase()) {
+      throw conflict('La matrícula ya existe en Control Escolar. Acuda a Control Escolar para vincular su cuenta.');
+    }
+    idStudent = existingStudent.id_student;
+    fullName = [existingStudent.first_name, existingStudent.last_name, existingStudent.second_last_name]
+      .filter(Boolean)
+      .join(' ');
+  } else {
+    const [studentEmailRows] = await connection.query(
+      'SELECT id_student FROM tb_students WHERE email = ? LIMIT 1',
+      [email]
+    );
+    if (studentEmailRows.length > 0) {
+      throw conflict('El correo electrónico ya está registrado en otro expediente. Acuda a Control Escolar.');
+    }
+
+    const [studentResult] = await connection.query(
+      `INSERT INTO tb_students
+        (id_group, enrollment, first_name, last_name, second_last_name, email, phone, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'activo')`,
+      [
+        data.idGroup,
+        enrollment,
+        data.firstName,
+        data.lastName,
+        data.secondLastName || null,
+        email,
+        data.phone || null,
+      ]
+    );
+    idStudent = studentResult.insertId;
+  }
+
+  const [userConflicts] = await connection.query(
+    `SELECT id_user, username, email
+       FROM tb_users
+      WHERE username = ? OR email = ?
+      LIMIT 1`,
+    [data.username, email]
+  );
+  if (userConflicts.length > 0) {
+    const row = userConflicts[0];
+    if (row.username.toLowerCase() === data.username.toLowerCase()) {
+      throw conflict('El nombre de usuario ya está en uso. Elija otro.');
+    }
+    throw conflict('El correo electrónico ya está asociado a una cuenta.');
+  }
+
+  const [roleRows] = await connection.query(
+    "SELECT id_role FROM tb_roles WHERE code = 'alumno' LIMIT 1"
+  );
+  if (roleRows.length === 0) {
+    throw new Error('El rol de alumno no está configurado en la base de datos');
+  }
+
+  const [userResult] = await connection.query(
+    `INSERT INTO tb_users (username, email, password_hash, full_name, id_student, active)
+     VALUES (?, ?, ?, ?, ?, 1)`,
+    [data.username, email, data.passwordHash, fullName, idStudent]
+  );
+  const idUser = userResult.insertId;
+
+  await connection.query(
+    'INSERT INTO tbd_user_roles (id_user, id_role, assigned_by) VALUES (?, ?, NULL)',
+    [idUser, roleRows[0].id_role]
+  );
+
+  return { idUser, idStudent };
+}, { ip: audit.ip, source: 'registro', userId: null });
+
 const logAuthEvent = async ({ idUser, username, action, description, ip }) => {
   await execute(
     `INSERT INTO tb_audit_logs
@@ -232,5 +346,6 @@ module.exports = {
   setActive,
   setRoles,
   resetPassword,
+  registerStudentAccount,
   logAuthEvent,
 };
