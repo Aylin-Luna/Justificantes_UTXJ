@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="260" viewBox="0 0 260 260" role="img" aria-label="Sello institucional UTXJ">
+  <defs>
+    <path id="stampTop" d="M 130,130 m -96,0 a 96,96 0 1,1 192,0" fill="none"/>
+    <path id="stampBottom" d="M 130,130 m -88,0 a 88,88 0 1,0 176,0" fill="none"/>
+  </defs>
+  <circle cx="130" cy="130" r="122" fill="none" stroke="#0b5d3b" stroke-width="5"/>
+  <circle cx="130" cy="130" r="112" fill="none" stroke="#0b5d3b" stroke-width="1.6"/>
+  <circle cx="130" cy="130" r="70" fill="none" stroke="#0b5d3b" stroke-width="1.4"/>
+  <text font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#0b5d3b" letter-spacing="2.4">
+    <textPath href="#stampTop" startOffset="50%" text-anchor="middle">UTXJ</textPath>
+  </text>
+  <text font-family="Arial, Helvetica, sans-serif" font-size="9.5" fill="#0b5d3b" letter-spacing="1.6">
+    <textPath href="#stampBottom" startOffset="50%" text-anchor="middle">DIRECCIÓN ACADÉMICA · AUTORIZADO</textPath>
+  </text>
+  <text x="130" y="116" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="20" font-weight="700" fill="#0b5d3b">UTXJ</text>
+  <text x="130" y="136" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="8.5" fill="#0b5d3b">JUSTIFICANTE ACADÉMICO</text>
+  <line x1="80" y1="146" x2="180" y2="146" stroke="#0b5d3b" stroke-width="1"/>
+  <text x="130" y="162" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="8" fill="#0b5d3b">JUS-20261026-0001</text>
+  <text x="130" y="176" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="7.5" fill="#0b5d3b">27 de octubre de 2026</text>
+  <text x="130" y="196" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="7" fill="#0b5d3b">Mtra. Altagracia Carrillo Parra</text>
+</svg>

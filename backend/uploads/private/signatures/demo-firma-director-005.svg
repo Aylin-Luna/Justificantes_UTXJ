@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="150" viewBox="0 0 420 150" role="img" aria-label="Firma electrónica de Mtra. Altagracia Carrillo Parra">
+  <rect width="420" height="150" fill="#ffffff"/>
+  <path d="M28 86 C 62 44, 84 108, 116 72 S 168 38, 190 78 S 238 108, 268 66 S 318 52, 344 84"
+        fill="none" stroke="#123c2b" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M52 96 C 110 108, 214 108, 300 92" fill="none" stroke="#123c2b" stroke-width="1.6" opacity="0.55"/>
+  <line x1="24" y1="112" x2="396" y2="112" stroke="#123c2b" stroke-width="1.2"/>
+  <text x="210" y="132" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="14" font-weight="700" fill="#123c2b">Mtra. Altagracia Carrillo Parra</text>
+  <text x="210" y="145" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+        font-size="9.5" fill="#5b6b62">Dirección de carrera · 16 de octubre de 2026</text>
+  <text x="396" y="22" text-anchor="end" font-family="Arial, Helvetica, sans-serif"
+        font-size="8" fill="#8a9a91">JUS-20261015-0001</text>
+</svg>

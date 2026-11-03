@@ -1,20 +1,24 @@
 {
   "name": "justificantes-utxj",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Sistema web de gestion de justificantes academicos UTXJ",
-  "main": "src/server.js",
+  "description": "Sistema web de gestión de justificantes académicos de la Universidad Tecnológica de Xicotepec de Juárez",
+  "main": "backend/app.js",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "start": "npm --prefix backend start",
+    "dev": "npm --prefix backend run dev",
+    "check": "node --check backend/app.js",
+    "setup": "npm --prefix backend install",
+    "erd": "node scripts/generate_erd.js",
+    "docs:data": "node scripts/generate_data_dictionary.js",
+    "docs": "npm run erd && npm run docs:data",
+    "demo:files": "node scripts/generate_demo_files.js"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.21.2",
-    "multer": "^2.0.2",
-    "mysql2": "^3.11.5"
+    "dotenv": "^16.4.7",
+    "mysql2": "^3.12.0"
   }
 }

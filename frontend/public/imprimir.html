@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Vista imprimible del justificante académico UTXJ.">
+  <meta name="theme-color" content="#07351f">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Justificante académico · UTXJ</title>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+  <a class="sr-only" href="#print-root">Saltar al documento</a>
+
+  <div class="print-page">
+    <div class="print-toolbar" role="toolbar" aria-label="Acciones del documento">
+      <div class="print-toolbar-note" id="print-toolbar-note">
+        Cargando el documento oficial…
+      </div>
+      <div class="print-toolbar-actions">
+        <a class="btn btn-ghost btn-sm" id="back-link" href="/app#/justificantes">
+          Volver al sistema
+        </a>
+        <button type="button" class="btn btn-primary btn-sm" id="print-button" disabled>
+          Imprimir / Guardar PDF
+        </button>
+      </div>
+    </div>
+
+    <main id="print-root" aria-live="polite">
+      <div class="print-loading" role="status">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Recuperando la información del justificante…</p>
+      </div>
+    </main>
+  </div>
+
+  <noscript>
+    <div class="print-error">
+      <div>
+        <h1>JavaScript es necesario</h1>
+        <p>Active JavaScript en su navegador para consultar e imprimir el justificante.</p>
+      </div>
+    </div>
+  </noscript>
+
+  <script type="module" src="/src/print.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Panel del Sistema de Gestión de Justificantes Académicos UTXJ.">
+  <meta name="theme-color" content="#07351f">
+  <title>Panel · Justificantes Académicos UTXJ</title>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+  <div id="app-loading" class="app-loading" role="status" aria-live="polite">
+    <div class="app-loading-inner">
+      <img src="/assets/img/logo-utxj.svg" alt="UTXJ" style="width:190px;margin-bottom:4px">
+      <span class="spinner" aria-hidden="true"></span>
+      <span>Verificando su sesión…</span>
+    </div>
+  </div>
+
+  <div id="app-shell" hidden></div>
+
+  <noscript>
+    <div style="position:fixed;inset:0;display:grid;place-items:center;background:#fff;color:#0d1f17;font-family:Segoe UI,Arial,sans-serif;padding:24px;text-align:center;z-index:999">
+      <p><strong>JavaScript es necesario para usar el sistema de justificantes.</strong><br>Habilítelo en su navegador y recargue la página.</p>
+    </div>
+  </noscript>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

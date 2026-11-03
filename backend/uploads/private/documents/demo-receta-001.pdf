@@ -1,0 +1,66 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 736 >>
+stream
+BT
+/F1 20 Tf
+72 740 Td
+(Receta medica \(documento ficticio\)) Tj
+/F1 11 Tf
+0 -34 Td
+(Sistema de Gestion de Justificantes Academicos - UTXJ) Tj
+0 -20 Td
+(DOCUMENTO DE DEMOSTRACION SIN VALIDEZ MEDICA) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(Paciente: Ingrid Natalia Martinez Carrasco) Tj
+0 -20 Td
+(Matricula: 240537) Tj
+0 -20 Td
+(Fecha de atencion: 26 de octubre de 2026) Tj
+0 -20 Td
+(Indicacion: reposo por 24 horas.) Tj
+0 -20 Td
+(Medico: Dra. Ejemplo Demostracion) Tj
+0 -20 Td
+(Cedula profesional: 0000000 \(ficticia\)) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(Este archivo se genera automaticamente para probar la carga,) Tj
+0 -20 Td
+(descarga y validacion de comprobantes privados.) Tj
+0 -20 Td
+ET
+0.12 0.36 0.23 RG
+3 w
+72 700 m 523 700 l S
+72 96 m 523 96 l S
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001028 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1098
+%%EOF
